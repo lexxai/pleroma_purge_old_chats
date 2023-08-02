@@ -1,3 +1,41 @@
 [build-system]
 requires = ["setuptools >= 65.0.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pleroma_purge_old_chats"
+authors = [
+    {name = "lexxai", email = "lexxai@gmail.com"},
+]
+description = "pleroma purge_old_chats"
+
+requires-python = ">=3.7"
+keywords = ["pleroma", "chats"]
+license = {file = "LICENSE"}
+#readme = {file = "README.md"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "psycopg2>=2.9.0",
+    'importlib_resources; python_version<"3.10"',
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/lexxai/pleroma_purge_old_chats"
+Documentation = "https://github.com/lexxai/pleroma_purge_old_chats"
+Repository = "https://github.com/lexxai/pleroma_purge_old_chats.git"
+Changelog = "https://github.com/lexxai/pleroma_purge_old_chats/blob/master/CHANGELOG.md"
+
+[tool.setuptools.package-data]
+pleroma_purge_old_chats = ["data/*.ini"]
+
+
+[tool.setuptools.packages.find]
+include = ["pleroma_purge_old_chats"]
+exclude = ["tests", "tests.*"]
+
+
+[project.scripts]
+pleroma_purge_old_chats = "pleroma_purge_old_chats.purge_old_chats:main"
