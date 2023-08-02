@@ -2,17 +2,23 @@
 
 # https://www.postgresqltutorial.com/postgresql-python/connect/
 
-
+import os
+import sys
 import argparse
 import psycopg2
-from pleroma_purge_old_chats.config import config
+try:
+    sys.path.append(os.path.dirname(__file__))
+    from pleroma_purge_old_chats.config import config
+except ImportError:
+    from config import config
 
 
 def vprint(*args):
     if verbose_mode:
         print(*args)
 
-def purge_old_messages():
+
+def purge_old_messages(config_file = None):
     """ Select old chats messages that oldest than 24h and purge it """
     conn = None
 
@@ -21,10 +27,11 @@ def purge_old_messages():
 
     try:
         # read connection parameters
-        db_params = config()
-        limits = config(section='limits')
-        LIMIT_ROWS = int(limits.get('rows'))
-        LIMIT_HOURS = int(limits.get('hours'))
+        conf_data = config(config_file)
+        db_params = conf_data['postgresql']
+        limits = conf_data['limits']
+        LIMIT_ROWS = int(limits.get('rows', LIMIT_ROWS))
+        LIMIT_HOURS = int(limits.get('hours', LIMIT_HOURS))
     except (Exception) as error:
         print(error)
 
@@ -33,8 +40,8 @@ def purge_old_messages():
                       " WHERE inserted_at <= NOW() - INTERVAL '{0:d} HOURS' LIMIT {1:d};".format(
                           LIMIT_HOURS, LIMIT_ROWS)
 
-    COUNT_CHAT_OBJECTS = "SELECT count(*) FROM public.chat_message_references"\
-                         " WHERE chat_id = %s;"   
+    # COUNT_CHAT_OBJECTS = "SELECT count(*) FROM public.chat_message_references"\
+    #                      " WHERE chat_id = %s;"   
 
     SELECT_OBJECT = "SELECT * FROM public.objects"\
                     " WHERE id = %s AND data->>'type' = 'ChatMessage';"
@@ -44,8 +51,9 @@ def purge_old_messages():
     DELETE_CHAT = "DELETE FROM public.chats WHERE id = %s;" 
     FIND_EMPTY_CHAT = "SELECT chats.id, chats.inserted_at  FROM chats"\
                       " LEFT JOIN chat_message_references ON chats.id = chat_message_references.chat_id"\
-                      " WHERE chats.inserted_at <= NOW() - INTERVAL '{} HOURS' AND chat_message_references.chat_id ISNULL"\
-                      " ORDER BY chats.inserted_at LIMIT {};".format(
+                      " WHERE chats.inserted_at <= NOW() - INTERVAL '{0:d} HOURS'"\
+                      " AND chat_message_references.chat_id ISNULL"\
+                      " ORDER BY chats.inserted_at LIMIT {1:d};".format(
                           LIMIT_HOURS, LIMIT_ROWS)
 
     delete_mode = True
@@ -109,13 +117,27 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', type=int, nargs='?', default=0, const=1,
                         help='Detailed printing of the result of command execution.')
+    parser.add_argument('-c', '--config',
+                        help='path to config ini file')
     args = parser.parse_args()
     verbose_mode = bool(int(args.verbose))
-    # print(verbose_mode)
+    #print(args)
+    if args.config is not None:
+        if not os.path.isfile(args.config):
+            print(f"config file '{args.config}' not found")
+            exit(1)
+        else:
+            args.config = os.path.abspath(args.config)
 
-    purge_old_messages()
 
+    purge_old_messages(args.config)
+
+verbose_mode = False
 
 if __name__ == '__main__':
-    verbose_mode = False
+    # pwd = os.path.dirname(__file__)
+    # sys.path.append(pwd)
+    # sys.path.append(os.path.join(pwd, 'data'))
+    # print(sys.path)
+    main()
 

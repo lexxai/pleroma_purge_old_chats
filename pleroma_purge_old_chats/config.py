@@ -1,31 +1,37 @@
 #!/usr/bin/env python
 
+import sys
+try:
+    if sys.version_info.major >=3 and sys.version_info.minor >= 10:
+        from importlib.resources import files
+    else:
+        from importlib_resources import files
+except ImportError as e:
+    print("ERROR:", e.args)
+import os    
 from configparser import ConfigParser
 
-import os
 
+def config(filename=None):
+    if filename is None:
+        filename = 'database.ini'
+        module = None
+        try:
+            module = files('pleroma_purge_old_chats.data')
+            filename_path = module.joinpath(filename)
+        except Exception:
+            # isn’t compatible with PEP 302
+            print('As a fallback, try using os.path to find the .ini (is "importlib_resources" installed by pip?)')
+            filename_path = os.path.join(os.path.dirname(__file__), 'data', filename)
+            print("bundled config filename:", filename_path)
+            filename_path = os.path.abspath(filename_path)
+    else:
+        filename_path = filename
 
-
-def config(filename='./database.ini', section='postgresql'):
-
-    # get the current working directory
-    current_working_directory = os.getcwd()
-    # print output to the console
-    print(current_working_directory)
+    #print("\nfilename:", filename_path)
 
     # create a parser
     parser = ConfigParser()
     # read config file
-    parser.read(filename)
-
-    # get section, default to postgresql
-    db = {}
-
-    if parser.has_section(section):
-        params = parser.items(section)
-        for param in params:
-            db[param[0]] = param[1]
-    else:
-        raise Exception('Section {0} not found in the {1} file'.format(section, filename))
-
-    return db
+    parser.read(filename_path)
+    return parser

@@ -3,6 +3,8 @@
 A script to search for old chat messages on the Pleroma social network server and immediately delete them from the postgres database
 
 ```
+pleroma_purge_old_chats -v
+
 Connecting to the PostgreSQL database...
 
 FOUND OLD CHAT MESSAGES: 3, with limit=3
@@ -36,3 +38,32 @@ Database connection closed.
 
 python -m pip install build
 python -m build
+
+# INSTALL
+
+python -m pip install .\dist\pleroma_purge_old_chats-\*.whl
+
+## RUN
+
+```
+pleroma_purge_old_chats -h
+usage: purge_old_chats.py [-h] [-v [VERBOSE]] [-c CONFIG]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v [VERBOSE], --verbose [VERBOSE]
+                        Detailed printing of the result of command execution.
+  -c CONFIG, --config CONFIG
+                        path to config ini file
+```
+
+## CONFIG
+
+[postgresql]
+host=localhost
+database=pleroma
+user=pleroma
+
+[limits]
+hours=24
+rows=500
