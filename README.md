@@ -1,5 +1,7 @@
-# Pleroma purge old chats messages 
- A script to search for old chat messages on the Pleroma social network server and immediately delete them from the postgres database 
+# Pleroma purge old chats messages
+
+A script to search for old chat messages on the Pleroma social network server and immediately delete them from the postgres database
+
 ```
 Connecting to the PostgreSQL database...
 
@@ -29,3 +31,8 @@ DELETE FROM public.chats WHERE id = 00000279-e1d5-0c65-e87f-278b09920000;
 DELETE FROM public.chats WHERE id = 0000027a-0c06-16be-1185-21bda6110000;
 Database connection closed.
 ```
+
+## BUILD
+
+python -m pip install build
+python -m build

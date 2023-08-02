@@ -2,8 +2,17 @@
 
 from configparser import ConfigParser
 
+import os
 
-def config(filename='database.ini', section='postgresql'):
+
+
+def config(filename='./database.ini', section='postgresql'):
+
+    # get the current working directory
+    current_working_directory = os.getcwd()
+    # print output to the console
+    print(current_working_directory)
+
     # create a parser
     parser = ConfigParser()
     # read config file

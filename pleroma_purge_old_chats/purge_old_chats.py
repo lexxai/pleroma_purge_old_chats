@@ -2,9 +2,11 @@
 
 # https://www.postgresqltutorial.com/postgresql-python/connect/
 
-import psycopg2
-from config import config
+
 import argparse
+import psycopg2
+from pleroma_purge_old_chats.config import config
+
 
 def vprint(*args):
     if verbose_mode:
@@ -101,13 +103,19 @@ def purge_old_messages():
             conn.close()
             vprint('Database connection closed.')
 
-if __name__ == '__main__':
-    verbose_mode = False
+
+def main():
+    global verbose_mode
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', type = int, nargs='?', default=0, const=1,
+    parser.add_argument('-v', '--verbose', type=int, nargs='?', default=0, const=1,
                         help='Detailed printing of the result of command execution.')
     args = parser.parse_args()
-    verbose_mode = bool(int(args.verbose)) 
-    #print(verbose_mode)
+    verbose_mode = bool(int(args.verbose))
+    # print(verbose_mode)
 
     purge_old_messages()
+
+
+if __name__ == '__main__':
+    verbose_mode = False
+
