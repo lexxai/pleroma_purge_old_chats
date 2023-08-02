@@ -4,6 +4,11 @@
 
 import psycopg2
 from config import config
+import argparse
+
+def vprint(*args):
+    if verbose_mode:
+        print(*args)
 
 def purge_old_messages():
     """ Select old chats messages that oldest than 24h and purge it """
@@ -37,13 +42,15 @@ def purge_old_messages():
     DELETE_CHAT = "DELETE FROM public.chats WHERE id = %s;" 
     FIND_EMPTY_CHAT = "SELECT chats.id, chats.inserted_at  FROM chats"\
                       " LEFT JOIN chat_message_references ON chats.id = chat_message_references.chat_id"\
-                      " WHERE chat_message_references.chat_id ISNULL"\
-                      " ORDER BY chats.inserted_at LIMIT {};".format(LIMIT_ROWS)
+                      " WHERE chats.inserted_at <= NOW() - INTERVAL '{} HOURS' AND chat_message_references.chat_id ISNULL"\
+                      " ORDER BY chats.inserted_at LIMIT {};".format(
+                          LIMIT_HOURS, LIMIT_ROWS)
 
+    delete_mode = True
 
     try:
         # connect to the PostgreSQL server
-        print('Connecting to the PostgreSQL database...')
+        vprint('Connecting to the PostgreSQL database...')
         conn = psycopg2.connect(**db_params)
         #transaction start
         with conn:
@@ -52,39 +59,55 @@ def purge_old_messages():
                 # SELECT CHAT OBJECTS THAT OLDEST THAN 24h
                 cur.execute( SELECT_CHAT_REF )
                 rows_found = cur.rowcount
-                print(f"\nFOUND OLD CHAT MESSAGES: {rows_found}, with limit={LIMIT_ROWS}")
+                vprint(f"\nFOUND OLD CHAT MESSAGES: {rows_found}, with limit={LIMIT_ROWS}")
                 rows = cur.fetchall()
                 for row in rows:
                     object_id = row[0]
                     # SELECT/DELETE OBJECTS BY ID
-                    print(f"\nDELETE OBJECT: '{object_id}'")
-                    #cur.execute( DELETE_OBJECT, (object_id,) )
-                    print(DELETE_OBJECT.replace('%s','{}').format(object_id))
-                    cur.execute( SELECT_OBJECT, (object_id,) )
+                    vprint(f"\nDELETE OBJECT: '{object_id}'")
+                    if delete_mode:
+                        cur.execute( DELETE_OBJECT, (object_id,) )
+                    else:
+                        vprint(DELETE_OBJECT.replace('%s','{}').format(object_id))
+                        cur.execute( SELECT_OBJECT, (object_id,) )
                     rows_deleted = cur.rowcount
                     if (rows_deleted):
-                        print("* DELETE REF OBJECT")
-                        print(DELETE_CHAT_REF.replace('%s','{}').format(object_id))
+                        vprint("* DELETE REF OBJECT")
+                        if delete_mode:
+                            cur.execute(DELETE_CHAT_REF, (object_id,))
+                        else:
+                            vprint(DELETE_CHAT_REF.replace('%s','{}').format(object_id))
+
                 #now find empty chats references on chats, end purge it
                 cur.execute( FIND_EMPTY_CHAT )
                 rows_found = cur.rowcount
                 if rows_found:
-                    print(f"\nEMPTY CHATS FOUND: {rows_found}, with limit={LIMIT_ROWS}")
+                    vprint(f"\nEMPTY CHATS FOUND: {rows_found}, with limit={LIMIT_ROWS}")
                     rows = cur.fetchall()
                     for i,row in  enumerate(rows):
                         chat_id = row[0]
                         inserted_at =  row[1]
-                        print(f"** DELETE EMPTY CHAT: {i+1}, created at: '{inserted_at}'")
+                        vprint(f"** DELETE EMPTY CHAT: {i+1}, created at: '{inserted_at}'")
                         #DELETE CHAT
-                        #cur.execute(DELETE_CHAT, chat_id)
-                        print(DELETE_CHAT.replace('%s','{}').format(chat_id))
+                        if delete_mode:
+                            cur.execute(DELETE_CHAT, (chat_id,))
+                        else:
+                            vprint(DELETE_CHAT.replace('%s','{}').format(chat_id))
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
         if conn is not None:
             conn.close()
-            print('Database connection closed.')
+            vprint('Database connection closed.')
 
 if __name__ == '__main__':
+    verbose_mode = False
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', type = int, nargs='?', default=0, const=1,
+                        help='Detailed printing of the result of command execution.')
+    args = parser.parse_args()
+    verbose_mode = bool(int(args.verbose)) 
+    #print(verbose_mode)
+
     purge_old_messages()
