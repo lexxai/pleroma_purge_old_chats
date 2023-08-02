@@ -36,12 +36,27 @@ Database connection closed.
 
 ## BUILD
 
+```
+python -m venv .venv
+
+# FreeBSD csh shell
+source .venv/bin/activate.csh
+
+# upgrade pip
+python -m pip install --upgrade pip
+
+# install and run build
 python -m pip install build
 python -m build
+```
 
 # INSTALL
 
-python -m pip install .\dist\pleroma_purge_old_chats-\*.whl
+```
+ls -1 ./dist
+pleroma_purge_old_chats-0.1.0-py3-none-any.whl
+python -m pip install dist/pleroma_purge_old_chats-0.1.0-py3-none-any.whl
+```
 
 ## RUN
 
