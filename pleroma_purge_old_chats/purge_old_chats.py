@@ -18,7 +18,7 @@ def vprint(*args):
         print(*args)
 
 
-def purge_old_messages(config_file = None):
+def purge_old_messages(config_file:str = None, demo:bool = None) -> None:
     """ Select old chats messages that oldest than 24h and purge it """
     conn = None
 
@@ -56,7 +56,8 @@ def purge_old_messages(config_file = None):
                       " ORDER BY chats.inserted_at LIMIT {1:d};".format(
                           LIMIT_HOURS, LIMIT_ROWS)
 
-    delete_mode = True
+    delete_mode = demo is None
+    #delete_mode = False
 
     try:
         # connect to the PostgreSQL server
@@ -120,9 +121,11 @@ def main():
                         help='Detailed printing of the result of command execution.')
     parser.add_argument('-c', '--config',
                         help='path to config ini file')
+    parser.add_argument('--demo', nargs='?', const=True,
+                        help='Demo mode without real delete records')
     args = parser.parse_args()
     verbose_mode = bool(int(args.verbose))
-    #print(args)
+    #vprint(args)
     if args.config is not None:
         if not os.path.isfile(args.config):
             print(f"config file '{args.config}' not found")
@@ -131,7 +134,7 @@ def main():
             args.config = os.path.abspath(args.config)
 
 
-    purge_old_messages(args.config)
+    purge_old_messages(args.config, demo=args.demo)
 
 verbose_mode = False
 

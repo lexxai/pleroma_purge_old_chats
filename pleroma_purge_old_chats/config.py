@@ -28,6 +28,10 @@ def config(filename=None):
     else:
         filename_path = filename
 
+    if not os.path.isfile(filename_path):
+        print(f"config file '{filename_path}' not found")
+        exit(1)    
+
     #print("\nfilename:", filename_path)
 
     # create a parser
