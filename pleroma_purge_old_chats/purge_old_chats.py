@@ -35,7 +35,7 @@ def purge_old_messages(config_file = None):
     except (Exception) as error:
         print(error)
 
-
+    SELECT_TIMEZONE = "SET TIMEZONE='UTC';"
     SELECT_CHAT_REF = "SELECT DISTINCT object_id FROM public.chat_message_references"\
                       " WHERE inserted_at <= NOW() - INTERVAL '{0:d} HOURS' LIMIT {1:d};".format(
                           LIMIT_HOURS, LIMIT_ROWS)
@@ -67,6 +67,7 @@ def purge_old_messages(config_file = None):
             with conn.cursor() as cur:
                 # execute a statement
                 # SELECT CHAT OBJECTS THAT OLDEST THAN 24h
+                cur.execute( SELECT_TIMEZONE )
                 cur.execute( SELECT_CHAT_REF )
                 rows_found = cur.rowcount
                 vprint(f"\nFOUND OLD CHAT MESSAGES: {rows_found}, with limit={LIMIT_ROWS}")
