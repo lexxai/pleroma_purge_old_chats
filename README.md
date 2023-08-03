@@ -37,6 +37,9 @@ Database connection closed.
 ## BUILD
 
 ```
+git clone https://github.com/lexxai/pleroma_purge_old_chats.git
+cd pleroma_purge_old_chats
+
 python -m venv .venv
 
 # FreeBSD csh shell
@@ -45,17 +48,13 @@ source .venv/bin/activate.csh
 # upgrade pip
 python -m pip install --upgrade pip
 
-# install and run build
-python -m pip install build
-python -m build
 ```
 
 # INSTALL
 
 ```
-ls -1 ./dist
-pleroma_purge_old_chats-0.1.0-py3-none-any.whl
-python -m pip install dist/pleroma_purge_old_chats-0.1.0-py3-none-any.whl
+python -m pip install .
+
 ```
 
 ## RUN
@@ -70,6 +69,8 @@ optional arguments:
                         Detailed printing of the result of command execution.
   -c CONFIG, --config CONFIG
                         path to config ini file
+
+pleroma_purge_old_chats -v
 ```
 
 ## CONFIG
