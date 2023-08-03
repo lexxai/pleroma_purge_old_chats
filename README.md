@@ -75,6 +75,7 @@ pleroma_purge_old_chats -v
 
 ## CONFIG
 
+```
 [postgresql]
 host=localhost
 database=pleroma
@@ -83,3 +84,4 @@ user=pleroma
 [limits]
 hours=24
 rows=500
+```
