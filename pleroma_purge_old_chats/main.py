@@ -1,7 +1,14 @@
+# try:
+#     import pleroma_purge_old_chats.purge_old_chats as pleroma_purge
+# except ImportError :
+#     import purge_old_chats as pleroma_purge
 try:
-    import pleroma_purge_old_chats.purge_old_chats as pleroma_purge
+    from .purge_old_chats import purge_old_messages
 except ImportError :
-    import purge_old_chats as pleroma_purge
+     from purge_old_chats import purge_old_messages
+import argparse
+import os
+#import sys
 
 
 def cli():
@@ -24,7 +31,7 @@ def cli():
             args.config = os.path.abspath(args.config)
 
 
-    pleroma_purge.purge_old_messages(args.config, demo=args.demo, 
+    purge_old_messages(args.config, demo=args.demo, 
                                      verbose_mode=verbose_mode)
 
     #pleroma_purge.main()

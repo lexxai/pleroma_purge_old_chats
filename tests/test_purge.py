@@ -1,10 +1,10 @@
 import sys
 try:
     sys.path.append("./")  
-    import pleroma_purge_old_chats.purge_old_chats as pleroma_purge
+    from pleroma_purge_old_chats import main as m
 except ImportError :
     sys.path.append("../")  
-    import pleroma_purge_old_chats.purge_old_chats as pleroma_purge
+    from pleroma_purge_old_chats import main as m
 
-
-pleroma_purge.main()
+if __name__ == '__main__':
+    m.cli()

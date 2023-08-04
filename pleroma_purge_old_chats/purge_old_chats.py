@@ -2,14 +2,13 @@
 
 # https://www.postgresqltutorial.com/postgresql-python/connect/
 
-import os
+#import os
 #import sys
-import argparse
 import psycopg2
 
 try:
     #sys.path.append(os.path.dirname(__file__))
-    from pleroma_purge_old_chats.config import config
+    from .config import config
 except ImportError:
     from config import config
 
@@ -126,34 +125,34 @@ def purge_old_messages(config_file:str = None,
             vprint('Database connection closed.')
 
 
-def main():
-    #global verbose_mode
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', type=int, nargs='?', default=0, const=1,
-                        help='Detailed printing of the result of command execution.')
-    parser.add_argument('-c', '--config',
-                        help='path to config ini file')
-    parser.add_argument('--demo', nargs='?', const=True,
-                        help='Demo mode without real delete records')
-    args = parser.parse_args()
-    verbose_mode = bool(int(args.verbose))
-    #vprint(args)
-    if args.config is not None:
-        if not os.path.isfile(args.config):
-            print(f"config file '{args.config}' not found")
-            exit(1)
-        else:
-            args.config = os.path.abspath(args.config)
+# def main():
+#     #global verbose_mode
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('-v', '--verbose', type=int, nargs='?', default=0, const=1,
+#                         help='Detailed printing of the result of command execution.')
+#     parser.add_argument('-c', '--config',
+#                         help='path to config ini file')
+#     parser.add_argument('--demo', nargs='?', const=True,
+#                         help='Demo mode without real delete records')
+#     args = parser.parse_args()
+#     verbose_mode = bool(int(args.verbose))
+#     #vprint(args)
+#     if args.config is not None:
+#         if not os.path.isfile(args.config):
+#             print(f"config file '{args.config}' not found")
+#             exit(1)
+#         else:
+#             args.config = os.path.abspath(args.config)
 
 
-    purge_old_messages(args.config, demo=args.demo, verbose_mode=args.verbose)
+#     purge_old_messages(args.config, demo=args.demo, verbose_mode=args.verbose)
 
-#verbose_mode = False
+# #verbose_mode = False
 
-if __name__ == '__main__':
-    # pwd = os.path.dirname(__file__)
-    # sys.path.append(pwd)
-    # sys.path.append(os.path.join(pwd, 'data'))
-    # print(sys.path)
-    main()
+# if __name__ == '__main__':
+#     # pwd = os.path.dirname(__file__)
+#     # sys.path.append(pwd)
+#     # sys.path.append(os.path.join(pwd, 'data'))
+#     # print(sys.path)
+#     main()
 

@@ -45,4 +45,4 @@ version = {file = "VERSION"}
 dependencies = {file = ["requirements.txt"]}
 
 [project.scripts]
-pleroma_purge_old_chats = "pleroma_purge_old_chats.purge_old_chats:main"
+pleroma_purge_old_chats = "pleroma_purge_old_chats.main:cli"
