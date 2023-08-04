@@ -2,12 +2,9 @@
 
 # https://www.postgresqltutorial.com/postgresql-python/connect/
 
-#import os
-#import sys
 import psycopg2
 
 try:
-    #sys.path.append(os.path.dirname(__file__))
     from .config import config
 except ImportError:
     from config import config

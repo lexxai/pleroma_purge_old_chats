@@ -2,7 +2,7 @@
 
 import sys
 try:
-    if sys.version_info.major >=3 and sys.version_info.minor >= 10:
+    if sys.version_info >= (3, 10):
         from importlib.resources import files
     else:
         from importlib_resources import files

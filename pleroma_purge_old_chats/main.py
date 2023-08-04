@@ -1,15 +1,14 @@
-# try:
-#     import pleroma_purge_old_chats.purge_old_chats as pleroma_purge
-# except ImportError :
-#     import purge_old_chats as pleroma_purge
 try:
     from .purge_old_chats import purge_old_messages
 except ImportError :
      from purge_old_chats import purge_old_messages
 import argparse
 import os
-#import sys
-
+import sys
+if sys.version_info >= (3, 8):
+    from importlib.metadata import version
+else:
+    from importlib_metadata import version
 
 def cli():
     #global verbose_mode
@@ -20,6 +19,8 @@ def cli():
                         help='path to config ini file')
     parser.add_argument('--demo', nargs='?', const=True,
                         help='Demo mode without real delete records')
+    parser.add_argument('--version', nargs='?', const=True,
+                        help='show version')                        
     args = parser.parse_args()
     verbose_mode = bool(int(args.verbose))
     #vprint(args)
@@ -30,11 +31,13 @@ def cli():
         else:
             args.config = os.path.abspath(args.config)
 
+    if args.version is not None:
+        print("Version:",version('pleroma_purge_old_chats'),__package__)
+        return
 
     purge_old_messages(args.config, demo=args.demo, 
                                      verbose_mode=verbose_mode)
 
-    #pleroma_purge.main()
 
 if __name__ == '__main__':
     cli()
