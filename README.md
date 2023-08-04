@@ -61,14 +61,16 @@ python -m pip install .
 
 ```
 pleroma_purge_old_chats -h
-usage: purge_old_chats.py [-h] [-v [VERBOSE]] [-c CONFIG]
+usage: pleroma_purge_old_chats [-h] [-v [VERBOSE]] [-c CONFIG] [--demo [DEMO]] [--version [VERSION]]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -v [VERBOSE], --verbose [VERBOSE]
                         Detailed printing of the result of command execution.
   -c CONFIG, --config CONFIG
                         path to config ini file
+  --demo [DEMO]         Demo mode without real delete records
+  --version [VERSION]   show version
 
 pleroma_purge_old_chats -v
 ```
