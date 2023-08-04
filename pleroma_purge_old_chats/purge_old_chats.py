@@ -3,22 +3,25 @@
 # https://www.postgresqltutorial.com/postgresql-python/connect/
 
 import os
-import sys
+#import sys
 import argparse
 import psycopg2
+
 try:
-    sys.path.append(os.path.dirname(__file__))
+    #sys.path.append(os.path.dirname(__file__))
     from pleroma_purge_old_chats.config import config
 except ImportError:
     from config import config
 
 
-def vprint(*args):
+def vprint(*args, verbose_mode:bool = False)  -> None:
     if verbose_mode:
         print(*args)
 
 
-def purge_old_messages(config_file:str = None, demo:bool = None) -> None:
+def purge_old_messages(config_file:str = None, 
+                       demo:bool = None, 
+                       verbose_mode:bool = False ) -> None:
     """ Select old chats messages that oldest than 24h and purge it """
     conn = None
 
@@ -59,9 +62,12 @@ def purge_old_messages(config_file:str = None, demo:bool = None) -> None:
     delete_mode = demo is None
     #delete_mode = False
 
+    if demo:
+        print('**** DEMO MODE *****')
+
     try:
         # connect to the PostgreSQL server
-        vprint('Connecting to the PostgreSQL database...')
+        vprint('Connecting to the PostgreSQL database...', verbose_mode=verbose_mode)
         conn = psycopg2.connect(**db_params)
         #transaction start
         with conn:
@@ -71,16 +77,18 @@ def purge_old_messages(config_file:str = None, demo:bool = None) -> None:
                 cur.execute( SELECT_TIMEZONE )
                 cur.execute( SELECT_CHAT_REF )
                 rows_found = cur.rowcount
-                vprint(f"\nFOUND OLD CHAT MESSAGES: {rows_found}, with limit={LIMIT_ROWS}")
+                vprint(f"\nFOUND OLD CHAT MESSAGES: {rows_found}, with limit={LIMIT_ROWS}"
+                        , verbose_mode=verbose_mode)
                 rows = cur.fetchall()
                 for row in rows:
                     object_id = row[0]
                     # SELECT/DELETE OBJECTS BY ID
-                    vprint(f"\nDELETE OBJECT: '{object_id}'")
+                    vprint(f"\nDELETE OBJECT: '{object_id}'", verbose_mode=verbose_mode)
                     if delete_mode:
                         cur.execute( DELETE_OBJECT, (object_id,) )
                     else:
-                        vprint(DELETE_OBJECT.replace('%s','{}').format(object_id))
+                        vprint(DELETE_OBJECT.replace('%s','{}').format(object_id), 
+                                verbose_mode=verbose_mode)
                         cur.execute( SELECT_OBJECT, (object_id,) )
                     rows_deleted = cur.rowcount
                     if (rows_deleted):
@@ -88,23 +96,27 @@ def purge_old_messages(config_file:str = None, demo:bool = None) -> None:
                         if delete_mode:
                             cur.execute(DELETE_CHAT_REF, (object_id,))
                         else:
-                            vprint(DELETE_CHAT_REF.replace('%s','{}').format(object_id))
+                            vprint(DELETE_CHAT_REF.replace('%s','{}').format(object_id), 
+                                   verbose_mode=verbose_mode)
 
                 #now find empty chats references on chats, end purge it
                 cur.execute( FIND_EMPTY_CHAT )
                 rows_found = cur.rowcount
                 if rows_found:
-                    vprint(f"\nEMPTY CHATS FOUND: {rows_found}, with limit={LIMIT_ROWS}")
+                    vprint(f"\nEMPTY CHATS FOUND: {rows_found}, with limit={LIMIT_ROWS}", 
+                            verbose_mode=verbose_mode)
                     rows = cur.fetchall()
                     for i,row in  enumerate(rows):
                         chat_id = row[0]
                         inserted_at =  row[1]
-                        vprint(f"** DELETE EMPTY CHAT: {i+1}, created at: '{inserted_at}'")
+                        vprint(f"** DELETE EMPTY CHAT: {i+1}, created at: '{inserted_at}'", 
+                                verbose_mode=verbose_mode)
                         #DELETE CHAT
                         if delete_mode:
                             cur.execute(DELETE_CHAT, (chat_id,))
                         else:
-                            vprint(DELETE_CHAT.replace('%s','{}').format(chat_id))
+                            vprint(DELETE_CHAT.replace('%s','{}').format(chat_id), 
+                                    verbose_mode=verbose_mode)
 
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -115,7 +127,7 @@ def purge_old_messages(config_file:str = None, demo:bool = None) -> None:
 
 
 def main():
-    global verbose_mode
+    #global verbose_mode
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', type=int, nargs='?', default=0, const=1,
                         help='Detailed printing of the result of command execution.')
@@ -134,9 +146,9 @@ def main():
             args.config = os.path.abspath(args.config)
 
 
-    purge_old_messages(args.config, demo=args.demo)
+    purge_old_messages(args.config, demo=args.demo, verbose_mode=args.verbose)
 
-verbose_mode = False
+#verbose_mode = False
 
 if __name__ == '__main__':
     # pwd = os.path.dirname(__file__)
